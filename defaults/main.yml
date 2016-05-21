@@ -1,0 +1,10 @@
+---
+# defaults file for sa-docker
+  root_dir: "{{ role_path }}"
+  role_dir: "{{ role_path }}"
+
+  deploy_user: "{{ansible_user_id}}"
+
+  option_install_docker_compose: true
+#  docker_compose_venv_directory: "/home/{{ansible_user_id}}/venv/docker"
+#  docker_compose_version: 1.7.1
