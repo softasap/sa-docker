@@ -22,6 +22,5 @@ Advanced (all params optional):
     - {
         role: "sa-docker",
         option_install_docker_compose: true,
-        docker_compose_version: 1.7.1,
         docker_compose_venv_directory: /home/slavko/venv/dockerenv
       }

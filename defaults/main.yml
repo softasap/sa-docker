@@ -7,4 +7,3 @@
 
   option_install_docker_compose: true
 #  docker_compose_venv_directory: "/home/{{ansible_user_id}}/venv/docker"
-#  docker_compose_version: 1.7.1
