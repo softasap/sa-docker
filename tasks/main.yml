@@ -7,3 +7,6 @@
 
   - include: tasks_docker_compose.yml
     when: option_install_docker_compose
+
+  - include: tasks_docker_registry.yml
+    when: option_install_docker_registry
