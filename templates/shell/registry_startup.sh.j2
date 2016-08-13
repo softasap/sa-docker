@@ -1,0 +1,9 @@
+#!/bin/bash
+
+
+docker run -d -p 5000:5000 --restart=always --name registry \
+  -v `pwd`/opt/letsencrypt/certs:/certs \
+  -v `pwd`/var/lib/registry:/var/lib/registry \
+  -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/{{docker_registry_cert_file}} \
+  -e REGISTRY_HTTP_TLS_KEY=/certs/{{docker_registry_key_file}} \
+  registry:2

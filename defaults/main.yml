@@ -8,3 +8,10 @@
   option_install_docker_compose: true
   option_install_docker_registry: false
 #  docker_compose_venv_directory: "/home/{{ansible_user_id}}/venv/docker"
+
+   docker_registry_path: /var/lib/docker_shared/registry
+   docker_registry_auth_path: /var/lib/docker_shared/auth
+   docker_registry_auth_file: htpasswd
+   docker_registry_certs_path: /opt/letsencrypt/certs
+   docker_registry_cert_file: domain.com/fullchain.pem
+   docker_registry_key_file: domain.com/privkey.pem

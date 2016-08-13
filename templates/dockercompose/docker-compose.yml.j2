@@ -1,0 +1,17 @@
+registry:
+  restart: always
+  image: registry:2
+  container_name: registry
+  ports:
+    - 5000:5000
+  environment:
+#    REGISTRY_HTTP_TLS_CERTIFICATE: /certs/{{docker_registry_cert_file}}
+#    REGISTRY_HTTP_TLS_KEY: /certs/{{docker_registry_key_file}}
+#    REGISTRY_AUTH: htpasswd
+#    REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+#    REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
+    SOME_ENV_VAR: some_env_var
+  volumes:
+    - {{docker_registry_path}}:/var/lib/registry #/data
+    - {{docker_registry_certs_path}}:/certs
+#    - {{docker_registry_auth_path}}:/auth
