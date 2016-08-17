@@ -1,0 +1,47 @@
+registry:
+  restart: always
+  image: registry:2
+  container_name: registry
+  ports:
+    - 5000:5000
+  environment:
+#    REGISTRY_HTTP_TLS_CERTIFICATE: /certs/{{docker_registry_cert_file}}
+#    REGISTRY_HTTP_TLS_KEY: /certs/{{docker_registry_key_file}}
+    REGISTRY_AUTH_TOKEN_REALM: https://{{docker_gitlab_address}}/jwt/auth
+    REGISTRY_AUTH_TOKEN_SERVICE: container_registry
+    REGISTRY_AUTH_TOKEN_ISSUER: gitlab-issuer
+    REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/{{docker_registry_cert_file}}
+    SOME_ENV_VAR: some_env_var
+  volumes:
+    - /var/lib/docker_shared/registry:/var/lib/registry #/data
+    - /opt/letsencrypt/certs:/certs
+#    - /var/lib/docker_shared/auth:/auth
+
+
+
+#  Use this template to get integrated with https://github.com/softasap/sa-gitlab-ce
+#  On hacking variables like REGISTRY_*.*.*
+#  see https://docs.docker.com/registry/configuration/
+#
+#
+#  In config/gitlab.yml paths must match previous
+#
+#  registry:
+#     enabled: true
+#     host: {{docker_gitlab_address}}
+#    # port: 5005
+#     api_url: http://localhost:5000/ # internal address to the registry, will be used by GitLab to directly communicate with API
+#     key: /opt/letsencrypt/certs/privkey.pem  # [VS] Changed from key_path
+#     path: /var/lib/registry
+#     issuer: gitlab-issuer
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
