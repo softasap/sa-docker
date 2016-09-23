@@ -7,7 +7,7 @@
         -docker
 
   - name: Docker | Add docker gpg keys
-    shell: wget -qO- https://get.docker.com/gpg | sudo apt-key add -
+    shell: wget -qO- https://get.docker.com/gpg | apt-key add -
     when: ansible_os_family == "Debian" and docker_present|failed
     become: yes
     tags:
