@@ -1,5 +1,5 @@
     - name: Python | install python-pip
-      package: name=python-pip update_cache=yes state=latest
+      package: name=python-pip state=latest
       become: yes
       tags:
         -setup
