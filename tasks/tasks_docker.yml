@@ -1,21 +1,26 @@
   - name: Docker | Check if is present
     command: test -x /usr/bin/docker
-    when: ansible_os_family == "Debian"
     ignore_errors: yes
     register: docker_present
     tags:
         -docker
 
+  - name: Python | install wget
+    package: name=wget state=present
+    become: yes
+    tags:
+      -docker
+
   - name: Docker | Add docker gpg keys
     shell: wget -qO- https://get.docker.com/gpg | apt-key add -
-    when: ansible_os_family == "Debian" and docker_present|failed
+    when: docker_present|failed and ansible_os_family == "Debian"
     become: yes
     tags:
         -docker
 
   - name: Docker | Install docker via web installer
     shell: wget -qO- https://get.docker.com/ | sh
-    when: ansible_os_family == "Debian" and docker_present|failed
+    when:  docker_present|failed
     become: yes
     tags:
         -docker

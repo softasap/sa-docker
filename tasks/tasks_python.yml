@@ -1,5 +1,5 @@
     - name: Python | install python-pip
-      apt: name=python-pip update_cache=yes state=latest
+      package: name=python-pip state=latest
       become: yes
       tags:
         -setup
@@ -13,7 +13,8 @@
         -python
 
     - name: Python | install python-dev
-      apt: name=python-dev update_cache=yes state=latest
+      package: name=python-dev update_cache=yes state=latest
+      when: ansible_os_family == "Debian"
       become: yes
       tags:
         -setup
