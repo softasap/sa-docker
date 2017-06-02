@@ -25,3 +25,12 @@
     become: yes
     tags:
         -docker
+
+  - name: Docker | Start and enable service
+    service: name=docker state=restarted enabled=yes
+    when: docker_test is not defined
+    become: yes
+    tags:
+        -docker
+
+
