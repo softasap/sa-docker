@@ -87,6 +87,7 @@
         become: yes
         tags:
           - docker
+          - skip_ansible_lint
 
       - name: Docker | Install docker-ce
         yum:
@@ -119,6 +120,7 @@
         become: yes
         tags:
           - docker
+          - skip_ansible_lint
 
       - name: Docker | Install docker-ce
         dnf:
@@ -130,7 +132,7 @@
         become: yes
         tags:
           - docker
-    when: docker_present is failed and ansible_distribution == "Fedora"  
+    when: docker_present is failed and ansible_distribution == "Fedora"
 
   - name: Docker | fallback - Install docker via web installer
     shell: wget -qO- https://get.docker.com/ | sh
