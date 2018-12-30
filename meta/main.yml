@@ -23,15 +23,22 @@ galaxy_info:
   platforms:
     - name: Ubuntu
       versions:
-        - trusty
+        # - trusty
         - xenial
+        - bionic
     - name: EL
       versions:
-        - 6
+        # - 6
         - 7
+    - name: Fedora
+      versions:
+        - 25
+        - 26
+        - 27
+        - 28
   galaxy_tags:
     - docker
-    - docker_compose
+    - dockercompose
     - ubuntu
   #platforms:
   #- name: EL

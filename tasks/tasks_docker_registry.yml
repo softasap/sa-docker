@@ -9,8 +9,11 @@
     shell: docker inspect registry | grep Status
     register: registry_status
     ignore_errors: true
+    changed_when: False
 
 
   - name: Docker | Load and start registry image (v2)
     shell: docker run -d -p 5000:5000 --restart=always --name registry registry:2
     when: registry_status | failed
+    tags:
+        -skip_ansible_lint
