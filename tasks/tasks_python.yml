@@ -116,7 +116,7 @@
 
       - name: Import EPEL GPG key.
         rpm_key: key="/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ epel_release_version | default(ansible_distribution_major_version) }}" state="present"
-        when: repo_repo_exists is failed
+        when: epel_repo_exists is failed
         become: yes
 
       when: option_install_epel or  option_install_epel is not defined
