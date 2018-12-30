@@ -12,5 +12,5 @@
 
   roles:
      - {
-        role: "sa-box-awx"
+        role: "sa-docker"
        }
