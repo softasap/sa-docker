@@ -10,15 +10,16 @@
   - debug: var="ansible_distribution"
 
   - name: Docker | Install dependencies
-    apt: name="{{ item }}" state="present"
+    apt:
+      name:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+      state: present
     retries: 3
     register: result
     until: result is not failed
-    with_items:
-      - apt-transport-https
-      - ca-certificates
-      - curl
-      - software-properties-common
     when: docker_present is failed and ansible_os_family == "Debian"
     become: yes
     tags:
@@ -66,16 +67,15 @@
 
       - name: Docker | Install dependencies
         yum:
-          name: "{{ item }}"
+          name:
+            - yum-utils
+            - device-mapper-persistent-data
+            - lvm2
           state: "present"
         retries: 3
         register: result
         until: result is not failed
         become: yes
-        with_items:
-          - yum-utils
-          - device-mapper-persistent-data
-          - lvm2
         tags:
           - docker
 
@@ -104,14 +104,13 @@
   - block:
       - name: Docker | Install dependencies
         dnf:
-          name: "{{ item }}"
+          name:
+            - dnf-plugins-core
           state: "present"
         retries: 3
         register: result
         until: result is not failed
         become: yes
-        with_items:
-          - dnf-plugins-core
         tags:
           - docker
 

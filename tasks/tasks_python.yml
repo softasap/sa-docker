@@ -68,24 +68,25 @@
         - libssl-dev
         - libffi-dev
       when: ansible_os_family == 'Debian'
-        and ansible_python_version | version_compare('2.6.0', '>=')
-        and ansible_python_version | version_compare('2.7.9', '<')
+        and ansible_python_version is version_compare('2.6.0', '>=')
+        and ansible_python_version is version_compare('2.7.9', '<')
       become: yes
       tags:
         -python
 
     - name: Python | install the Python SNI python-pip dependencies.
-      pip: name="{{ item }}" state=present
+      pip:
+       name:
+          - pyopenssl
+          - ndg-httpsclient
+          - pyasn1
+       state: present
       retries: 3
       register: result
       until: result is not failed
-      with_items:
-        - pyopenssl
-        - ndg-httpsclient
-        - pyasn1
       when: ansible_os_family == 'Debian'
-        and ansible_python_version | version_compare('2.6.0', '>=')
-        and ansible_python_version | version_compare('2.7.9', '<')
+        and ansible_python_version is version_compare('2.6.0', '>=')
+        and ansible_python_version is version_compare('2.7.9', '<')
       become: yes
       tags:
         -python
