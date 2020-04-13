@@ -42,15 +42,6 @@
         -python
         -skip_ansible_lint
 
-    - name: Python | virtualenvwrapper console support
-      apt: pkg="virtualenvwrapper" state="present"
-      retries: 3
-      register: result
-      until: result is not failed
-      become: yes
-      tags:
-        -python
-
     - name: Python | install ca-certificates
       package: name="ca-certificates" state=present
       retries: 3
