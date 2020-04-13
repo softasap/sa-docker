@@ -1,8 +1,4 @@
 ---
-  - debug: var="ansible_distribution"
-
-  - debug: var="ansible_os_family"
-
   - block:
 
     - name: Python | install python3-pip
@@ -137,6 +133,6 @@
         -skip_ansible_lint
 
 
-    when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+    when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution=='Fedora'
 
 # / CentOs  Redhat
