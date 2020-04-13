@@ -1,3 +1,13 @@
+- name: install the 'Development tools' package group
+  yum:
+    name: "@Development tools"
+    state: present
+  become: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  tags:
+    - docker-compose
+
+
 - block:
   - name: Docker Composer | Install pip and depls
     package:

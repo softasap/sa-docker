@@ -2,7 +2,7 @@
 # tasks file for sa-docker
   - include: tasks_docker.yml
 
-  - include: tasks_python.yml
+  - include: tasks_python_fallback.yml
     when: option_install_docker_python or ( docker_test is defined and docker_test)
 
   - include: tasks_docker_compose.yml
