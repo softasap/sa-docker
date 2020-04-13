@@ -10,7 +10,10 @@
 
 - block:
 
-  - name: Docker Composer | Set fact pip to use
+  - name: Docker Compose | Detected python
+    debug: var="ansible_python_version"
+
+  - name: Docker Compose | Set fact pip to use
     set_fact:
       docker_compose_pip_executable: pip
     tags:
@@ -20,7 +23,10 @@
 
 - block:
 
-  - name: Docker Composer | Set fact pip to use
+  - name: Docker Compose | Detected python
+    debug: var="ansible_python_version"
+
+  - name: Docker Composer | Set fact pip to use (3)
     set_fact:
       docker_compose_pip_executable: pip3
     tags:
