@@ -2,7 +2,11 @@
   - block:
 
     - name: Python | install python3-pip
-      apt: name=python3-pip update_cache=yes state=present
+      apt:
+        update_cache: yes
+        state: present
+        name:
+         - python3-pip
       retries: 3
       register: result
       until: result is not failed
@@ -11,7 +15,7 @@
         -python
 
     - name: Python | Update pip
-      shell: pip3 install -U pip3 pyopenssl ndg-httpsclient pyasn1
+      shell: pip3 install -U  pyopenssl ndg-httpsclient pyasn1
       become: yes
       tags:
         -python
