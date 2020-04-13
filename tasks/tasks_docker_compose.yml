@@ -1,5 +1,47 @@
+- block:
+  - name: Docker Composer | Install pip and depls
+    package:
+        name:
+          - python-setuptools
+          - python-pip
+        state: present
+    become: yes
+    tags:
+      - docker-compose
+
+  - name: Docker Composer | Set fact pip to use
+    set_fact:
+      docker_compose_pip_executable: pip
+    tags:
+      - docker-compose
+
+  when: ansible_python_version is version_compare('3','<')
+
+- block:
+
+  - name: Docker Composer | Install pip and deps (3)
+    package:
+        name:
+          - python3-setuptools
+          - python3-pip
+        state: present
+    become: yes
+    tags:
+      - docker-compose
+
+  - name: Docker Composer | Set fact pip to use
+    set_fact:
+      docker_compose_pip_executable: pip3
+    tags:
+      - docker-compose
+
+  when: ansible_python_version is version_compare('3','>=')
+
 - name: Docker Composer | Installing pypi package
-  pip: name=docker-compose  state=present
+  pip:
+     name: docker-compose
+     state: present
+     executable: "{{ docker_compose_pip_executable }}"
   retries: 3
   register: result
   until: result is not failed

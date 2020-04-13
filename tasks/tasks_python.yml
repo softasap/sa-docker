@@ -1,5 +1,5 @@
 ---
-  #  sa-python v 1.4.0
+  #  sa-python v 1.7.0
   - block:
 
     - name: Python | install python-pip
@@ -106,7 +106,9 @@
         ignore_errors: true
 
       - name: Install EPEL repo.
-        yum: name="https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ epel_release_version | default(ansible_distribution_major_version) }}.noarch.rpm"  state=present
+        yum:
+          name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ epel_release_version | default(ansible_distribution_major_version) }}.noarch.rpm"
+          state: present
         retries: 5
         delay: 10
         when: epel_repo_exists is failed
@@ -114,6 +116,8 @@
         register: result
         changed_when: '"installed" in result'
         until: '"failed" not in result'
+        tags:
+          - skip_ansible_lint
 
       - name: Import EPEL GPG key.
         rpm_key: key="/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ epel_release_version | default(ansible_distribution_major_version) }}" state="present"

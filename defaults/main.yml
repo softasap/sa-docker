@@ -7,6 +7,7 @@
 
   option_install_docker_compose: true
   option_install_docker_registry: false
+  option_install_docker_python: false
 #  docker_compose_venv_directory: "/home/{{ansible_user_id}}/venv/docker"
 
   docker_registry_path: /var/lib/docker_shared/registry
