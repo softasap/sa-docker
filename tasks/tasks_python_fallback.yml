@@ -1,4 +1,8 @@
 ---
+  - debug: var="ansible_distribution"
+
+  - debug: var="ansible_os_family"
+
   - block:
 
     - name: Python | install python3-pip
