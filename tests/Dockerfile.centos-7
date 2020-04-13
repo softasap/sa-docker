@@ -11,6 +11,8 @@ RUN pip3 install -U  pyopenssl ndg-httpsclient pyasn1
 RUN pip3 install -U ansible==2.9.6 ansible-lint
 RUN mkdir -p /etc/ansible
 
+RUN yum -y groupinstall "Development Tools"
+
 # Install Ansible inventory file
 RUN echo "[local]" > /etc/ansible/hosts
 RUN echo "localhost ansible_connection=local" >> /etc/ansible/hosts
