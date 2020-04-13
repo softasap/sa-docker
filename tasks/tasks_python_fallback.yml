@@ -93,7 +93,7 @@
         when: epel_repo_exists is failed
         become: yes
 
-      when: option_install_epel or  option_install_epel is not defined
+      when: (option_install_epel or  option_install_epel is not defined) and (ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux')
 
     - name: Python | install python3
       yum: name=python3 update_cache=yes state=present
