@@ -6,9 +6,9 @@ ENV container docker
 RUN rpm -iUvh http://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/e/epel-release-7-12.noarch.rpm
 
 # Install Ansible
-RUN yum -y install sudo python3 python3-setuptools
+RUN yum -y install sudo python3
 RUN pip3 install -U  pyopenssl ndg-httpsclient pyasn1
-RUN pip3 install -U ansible==2.9.6 ansible-lint
+RUN pip3 install -U ansible==2.9.6 ansible-lint setuptools
 RUN mkdir -p /etc/ansible
 
 RUN yum -y groupinstall "Development Tools"
