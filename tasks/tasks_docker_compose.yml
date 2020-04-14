@@ -1,5 +1,45 @@
-- name: Docker Composer | Installing pypi package
-  pip: name=docker-compose  state=present
+- name: install the 'Development tools' package group
+  yum:
+    name: "@Development tools"
+    state: present
+  become: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  tags:
+    - docker-compose
+
+
+- block:
+
+  - name: Docker Compose | Detected python
+    debug: var="ansible_python_version"
+
+  - name: Docker Compose | Set fact pip to use
+    set_fact:
+      docker_compose_pip_executable: pip
+    tags:
+      - docker-compose
+
+  when: preferred_python_version is version_compare('3','<')
+
+- block:
+
+  - name: Docker Compose | Detected python
+    debug: var="ansible_python_version"
+
+  - name: Docker Composer | Set fact pip to use (3)
+    set_fact:
+      docker_compose_pip_executable: pip3
+    tags:
+      - docker-compose
+
+  when: preferred_python_version is version_compare('3','>=')
+
+- name: Docker Composer | Installing pypi package using {{ docker_compose_pip_executable }}
+  # pip:
+  #    name: docker-compose
+  #    state: present
+  #    executable: "{{ docker_compose_pip_executable }}"
+  shell: "{{ docker_compose_pip_executable }} install docker-compose"
   retries: 3
   register: result
   until: result is not failed
@@ -7,6 +47,7 @@
   become: yes
   tags:
     - docker-compose
+    - skip_ansible_lint
 
 - name: Docker Composer | Installing pypi package in venv
   pip: name=docker-compose  virtualenv="{{ docker_compose_venv_directory }}" state=present
