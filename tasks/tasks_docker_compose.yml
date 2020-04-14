@@ -19,7 +19,7 @@
     tags:
       - docker-compose
 
-  when: ansible_python_version is version_compare('3','<')
+  when: preferred_python_version is version_compare('3','<')
 
 - block:
 
@@ -32,7 +32,7 @@
     tags:
       - docker-compose
 
-  when: ansible_python_version is version_compare('3','>=')
+  when: preferred_python_version is version_compare('3','>=')
 
 - name: Docker Composer | Installing pypi package
   pip:

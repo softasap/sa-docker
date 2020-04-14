@@ -21,3 +21,4 @@
 #(if it exists) over the discovered Python version. You can set it to auto, which will be default in the future, so
 #it will work in the opposite way.
 #  ansible_python_interpreter: auto
+  preferred_python_version: "{{ ansible_python_version }}"
