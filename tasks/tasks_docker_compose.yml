@@ -39,6 +39,38 @@
     tags:
       - docker-compose
 
+  - name: Python | install pip build environment (debian)
+    package:
+        state: present
+        name:
+          - build-essential
+          - libssl-dev
+          - libffi-dev
+          - python-dev
+    retries: 3
+    register: result
+    until: result is not failed
+    when: (pip_present is failed) and (ansible_os_family == "Debian")
+    become: yes
+    tags:
+       - docker-compose
+
+  - name: Python | install pip build environment (rpm/fedora)
+    package:
+        state: present
+        name:
+          - gcc
+          - libffi-devel
+          - python-devel
+          - openssl-devel
+    retries: 3
+    register: result
+    until: result is not failed
+    when: (pip_present is failed) and (ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution=='Fedora')
+    become: yes
+    tags:
+       - docker-compose
+
   when: preferred_python_version is version_compare('3','<')
 
 - block:
@@ -71,6 +103,39 @@
     become: yes
     tags:
       - docker-compose
+
+  - name: Python | install pip3 build environment (debian)
+    package:
+        state: present
+        name:
+          - build-essential
+          - libssl-dev
+          - libffi-dev
+          - python3-dev
+    retries: 3
+    register: result
+    until: result is not failed
+    when: (pip_present is failed) and (ansible_os_family == "Debian")
+    become: yes
+    tags:
+       - docker-compose
+
+  - name: Python | install pip build environment (rpm/fedora)
+    package:
+        state: present
+        name:
+          - gcc
+          - libffi-devel
+          - python3-devel
+          - openssl-devel
+    retries: 3
+    register: result
+    until: result is not failed
+    when: (pip_present is failed) and (ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution=='Fedora')
+    become: yes
+    tags:
+       - docker-compose
+
 
   when: preferred_python_version is version_compare('3','>=')
 
