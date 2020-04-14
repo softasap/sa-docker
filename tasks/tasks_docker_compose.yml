@@ -34,11 +34,12 @@
 
   when: preferred_python_version is version_compare('3','>=')
 
-- name: Docker Composer | Installing pypi package
-  pip:
-     name: docker-compose
-     state: present
-     executable: "{{ docker_compose_pip_executable }}"
+- name: Docker Composer | Installing pypi package using {{ docker_compose_pip_executable }}
+  # pip:
+  #    name: docker-compose
+  #    state: present
+  #    executable: "{{ docker_compose_pip_executable }}"
+  shell: "{{ docker_compose_pip_executable }} install docker-compose"
   retries: 3
   register: result
   until: result is not failed
@@ -46,6 +47,7 @@
   become: yes
   tags:
     - docker-compose
+    - skip_ansible_lint
 
 - name: Docker Composer | Installing pypi package in venv
   pip: name=docker-compose  virtualenv="{{ docker_compose_venv_directory }}" state=present
