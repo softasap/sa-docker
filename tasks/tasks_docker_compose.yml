@@ -19,6 +19,26 @@
     tags:
       - docker-compose
 
+  - name: Check if pip is installed
+    shell: command -v pip >/dev/null 2>&1
+    register: pip_present
+    ignore_errors: yes
+    tags:
+      - docker-compose
+
+  - name: Python | install python-pip
+    package:
+      state: present
+      name:
+        - python-pip
+    retries: 3
+    register: result
+    until: result is not failed
+    when: pip_present is failed
+    become: yes
+    tags:
+      - docker-compose
+
   when: preferred_python_version is version_compare('3','<')
 
 - block:
@@ -29,6 +49,26 @@
   - name: Docker Composer | Set fact pip to use (3)
     set_fact:
       docker_compose_pip_executable: pip3
+    tags:
+      - docker-compose
+
+  - name: Check if pip3 is installed
+    shell: command -v pip3 >/dev/null 2>&1
+    register: pip_present
+    ignore_errors: yes
+    tags:
+      - docker-compose
+
+  - name: Python | install python3-pip
+    package:
+      state: present
+      name:
+        - python3-pip
+    retries: 3
+    register: result
+    until: result is not failed
+    when: pip_present is failed
+    become: yes
     tags:
       - docker-compose
 
