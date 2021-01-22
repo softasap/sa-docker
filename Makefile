@@ -13,6 +13,9 @@ molecule-docker-fedora33:
 molecule-docker-xenial:
 	MOLECULE_DISTRO=ubuntu1604 MOLECULE_TEST_ROLE=$(notdir $(CURDIR)) molecule converge -s docker
 
+molecule-docker-xenial-interactive:
+	docker exec -it geerlingguy/docker-ubuntu1604-ansible:latest /bin/bash
+
 molecule-docker-beaver:
 	MOLECULE_DISTRO=ubuntu1804 MOLECULE_TEST_ROLE=$(notdir $(CURDIR)) molecule converge -s docker
 

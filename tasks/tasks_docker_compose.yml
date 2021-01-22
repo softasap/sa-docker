@@ -104,6 +104,12 @@
     tags:
       - docker-compose
 
+  - name: Upgrade pip if any
+    shell: pip3 install -U pip
+    ignore_errors: yes
+    tags:
+      - docker-compose
+
   - name: Python | install pip3 build environment (debian)
     package:
         state: present

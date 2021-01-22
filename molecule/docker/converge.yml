@@ -20,7 +20,7 @@
     - name: Install default ubuntu packages
       apt:
         name:
-          - gpg-agent
+          - gnupg-agent
         state: present
       when: ansible_os_family == "Debian"
    
