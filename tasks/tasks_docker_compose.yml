@@ -104,6 +104,14 @@
     tags:
       - docker-compose
 
+  - name: Upgrade pip if any
+    shell: pip3 install -U pip
+    ignore_errors: yes
+    when: pip_present is failed
+    tags:
+      - docker-compose
+      - skip_ansible_lint
+
   - name: Python | install pip3 build environment (debian)
     package:
         state: present
