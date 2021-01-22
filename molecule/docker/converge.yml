@@ -8,6 +8,13 @@
 
   pre_tasks:
     - debug: var="role_under_test"
+
+    - name: Update and upgrade apt packages
+      apt:
+        upgrade: no
+        update_cache: yes
+        cache_valid_time: 86400 #One day
+      when: ansible_os_family == "Debian"
   vars:
     ansible_python_interpreter: auto
 #  roles:
