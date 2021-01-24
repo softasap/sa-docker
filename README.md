@@ -3,6 +3,7 @@ sa-docker
 
 [![Build Status](https://travis-ci.org/softasap/sa-docker.svg?branch=master)](https://travis-ci.org/softasap/sa-docker)
 [![Build Status](https://github.com/softasap/sa-docker/workflows/CI/badge.svg?event=push)](https://github.com/softasap/sa-docker/actions?query=workflow%3ACI)
+![Version on Galaxy](https://img.shields.io/badge/dynamic/json?style=flat&label=galaxy&prefix=v&url=https://galaxy.ansible.com/api/v2/collections/softasap/sa-docker/&query=latest_version.version)
 
 Installs basic docker packages (via Omnibus installer) & optional docker-compose
 
