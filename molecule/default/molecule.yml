@@ -58,7 +58,8 @@ platforms:
   - name: bionic
     provider_raw_config_args:
       - "customize [ 'modifyvm', :id, '--uartmode1', 'disconnected' ]"
-    box: ubuntu/bionic64
+#    box: ubuntu/bionic64
+    box: centos/7
     memory: 4096
     cpus: 2
 #    groups:
