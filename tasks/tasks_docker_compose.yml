@@ -7,6 +7,13 @@
   tags:
     - docker-compose
 
+# - name: Dirty setup rust for crypthography
+#   shell: yes | curl https://sh.rustup.rs -sSf | sh
+#   become: yes
+#   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+#   tags:
+#     - skip_ansible_lint
+#     - docker-compose
 
 - block:
 
@@ -26,6 +33,15 @@
     tags:
       - docker-compose
 
+  - name: Python | Ensure epel repo present for centos
+    yum:
+      name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+      state: present
+    when: pip_present is failed
+    become: yes
+    tags:
+      - docker-compose
+
   - name: Python | install python-pip
     package:
       state: present
@@ -34,7 +50,7 @@
     retries: 3
     register: result
     until: result is not failed
-    when: pip_present is failed and (ansible_os_family == "Debian")
+    when: pip_present is failed
     become: yes
     tags:
       - docker-compose
@@ -47,6 +63,8 @@
           - libssl-dev
           - libffi-dev
           - python-dev
+          - rust
+          - cargo
     retries: 3
     register: result
     until: result is not failed
@@ -63,6 +81,8 @@
           - libffi-devel
           - python-devel
           - openssl-devel
+          - rust
+          - cargo
     retries: 3
     register: result
     until: result is not failed
@@ -99,7 +119,7 @@
     retries: 3
     register: result
     until: result is not failed
-    when: pip_present is failed and (ansible_os_family == "Debian")
+    when: pip_present is failed
     become: yes
     tags:
       - docker-compose
@@ -120,6 +140,8 @@
           - libssl-dev
           - libffi-dev
           - python3-dev
+          - rust
+          - cargo
     retries: 3
     register: result
     until: result is not failed
@@ -136,6 +158,8 @@
           - libffi-devel
           - python3-devel
           - openssl-devel
+          - rust
+          - cargo
     retries: 3
     register: result
     until: result is not failed
@@ -152,25 +176,31 @@
   #    name: docker-compose
   #    state: present
   #    executable: "{{ docker_compose_pip_executable }}"
-  shell: "{{ docker_compose_pip_executable }} install docker-compose"
+  shell: "{{ docker_compose_pip_executable }} install {{ item }}"
   retries: 3
   register: result
   until: result is not failed
   when: docker_compose_venv_directory is not defined
   become: yes
+  with_items:
+    - setuptools-rust
+    - docker-compose
   tags:
     - docker-compose
     - skip_ansible_lint
 
 - name: Docker Composer | Installing pypi package in venv
   pip:
-    name: docker-compose
+    name: "{{ item }}"
     virtualenv: "{{ docker_compose_venv_directory }}"
     state: present
   retries: 3
   register: result
   until: result is not failed
   when: docker_compose_venv_directory is defined
+  with_items:
+    - setuptools-rust
+    - docker-compose
   become: yes
   tags:
     - docker-compose
