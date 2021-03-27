@@ -1,4 +1,4 @@
-sa-docker
+sa_docker
 =========
 
 [![Build Status](https://travis-ci.org/softasap/sa-docker.svg?branch=master)](https://travis-ci.org/softasap/sa-docker)
@@ -13,7 +13,7 @@ Simple
 ```YAML
   roles:
     - {
-        role: "sa-docker"
+        role: "sa_docker"
       }
 ```
 
@@ -24,7 +24,7 @@ Advanced (all params optional):
 ```YAML
   roles:
     - {
-        role: "sa-docker",
+        role: "sa_docker",
         option_install_docker_compose: true,
         docker_compose_venv_directory: /home/slavko/venv/dockerenv
       }
@@ -34,24 +34,24 @@ Advanced (all params optional):
 Usage with ansible galaxy workflow
 ----------------------------------
 
-If you installed the sa-docker  role using the command
+If you installed the sa_docker  role using the command
 
 
 `
-   ansible-galaxy install softasap.sa-docker
+   ansible-galaxy install softasap.sa_docker
 `
 
-the role will be available in the folder library/sa-docker
+the role will be available in the folder library/sa_docker
 
 Please adjust the path accordingly.
 
 ```YAML
 
      - {
-         role: "softasap.sa-docker"
+         role: "softasap.sa_docker"
        }
 
-```   
+```
 
 
 

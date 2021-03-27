@@ -7,6 +7,10 @@ name: CI
       - master
       - develop
       - '!release/*'
+      - 'feature*'
+      - 'hotfix*'
+      - 'bugfix*'
+      - 'local*'
   schedule:
     - cron: "10 5 * * 2"
 
@@ -31,7 +35,7 @@ jobs:
           python-version: '3.6'
 
       - name: Install test dependencies.
-        run: pip3 install ansible yamllint ansible-lint
+        run: pip3 install yamllint ansible-lint ansible==2.9.6
 
       - name: Lint code.
         run: |
@@ -44,11 +48,11 @@ jobs:
     strategy:
       matrix:
         distro:
-          - fedora33
-          - centos7
-          - ubuntu1604
-          - ubuntu1804
-          - ubuntu2004
+          - name: fedora33
+          - name: centos7
+          - name: ubuntu1604
+          - name: ubuntu1804
+          - name: ubuntu2004
 
     steps:
       - name: Check out the codebase.
@@ -83,5 +87,5 @@ jobs:
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
-          MOLECULE_DISTRO: ${{ matrix.distro }}
+          MOLECULE_DISTRO: ${{ matrix.distro.name }}
           MOLECULE_TEST_ROLE: role_under_test

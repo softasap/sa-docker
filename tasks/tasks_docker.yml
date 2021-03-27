@@ -7,7 +7,8 @@
     tags:
         -docker
 
-  - debug: var="ansible_distribution"
+  - name: DEBUG | current distribution
+    debug: var="ansible_distribution"
 
   - name: Docker | Install dependencies
     apt:
@@ -23,7 +24,6 @@
     become: yes
     tags:
         -docker
-
 
   - name: Docker | Add docker gpg keys
     apt_key:
