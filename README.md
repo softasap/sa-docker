@@ -51,7 +51,7 @@ Please adjust the path accordingly.
          role: "softasap.sa-docker"
        }
 
-```   
+```
 
 
 
