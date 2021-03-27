@@ -7,13 +7,22 @@
   tags:
     - docker-compose
 
-# - name: Dirty setup rust for crypthography
-#   shell: yes | curl https://sh.rustup.rs -sSf | sh
-#   become: yes
-#   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-#   tags:
-#     - skip_ansible_lint
-#     - docker-compose
+- name: Docker Compose | install rustup for current user
+  shell: curl https://sh.rustup.rs -sSf | sh -s -- -y
+  args:
+    creates: "~/.cargo/bin/"
+  tags:
+    - docker-compose
+    - skip_ansible_lint
+
+- name: Docker Compose | install rustup for root
+  shell: curl https://sh.rustup.rs -sSf | sh -s -- -y
+  args:
+    creates: "~/.cargo/bin/"
+  become: yes
+  tags:
+    - docker-compose
+    - skip_ansible_lint
 
 - block:
 
@@ -98,7 +107,7 @@
   - name: Docker Compose | Detected python
     debug: var="ansible_python_version"
 
-  - name: Docker Composer | Set fact pip to use (3)
+  - name: Docker Compose | Set fact pip to use (3)
     set_fact:
       docker_compose_pip_executable: pip3
     tags:
@@ -140,8 +149,6 @@
           - libssl-dev
           - libffi-dev
           - python3-dev
-          - rust
-          - cargo
     retries: 3
     register: result
     until: result is not failed
@@ -171,25 +178,33 @@
 
   when: preferred_python_version is version_compare('3','>=')
 
-- name: Docker Composer | Installing pypi package using {{ docker_compose_pip_executable }}
-  # pip:
-  #    name: docker-compose
-  #    state: present
-  #    executable: "{{ docker_compose_pip_executable }}"
-  shell: "{{ docker_compose_pip_executable }} install {{ item }}"
+- name: Docker Compose | Upgrade pip version
+  shell: "{{ docker_compose_pip_executable }} install -U pip"
+  when: docker_compose_venv_directory is not defined
+  become: yes
+  tags:
+     - docker-compose
+     - skip_ansible_lint
+
+- name: Docker Compose | Installing pypi package using shell with {{ docker_compose_pip_executable }}
+  pip:
+     name: "{{ item }}"
+     state: present
+     executable: "{{ docker_compose_pip_executable }}"
+  # shell: "{{ docker_compose_pip_executable }} install {{ item }}"
   retries: 3
   register: result
   until: result is not failed
   when: docker_compose_venv_directory is not defined
   become: yes
   with_items:
-    - setuptools-rust
+#    - setuptools-rust
     - docker-compose
   tags:
     - docker-compose
     - skip_ansible_lint
 
-- name: Docker Composer | Installing pypi package in venv
+- name: Docker Compose | Installing pypi package in venv
   pip:
     name: "{{ item }}"
     virtualenv: "{{ docker_compose_venv_directory }}"
@@ -199,7 +214,6 @@
   until: result is not failed
   when: docker_compose_venv_directory is defined
   with_items:
-    - setuptools-rust
     - docker-compose
   become: yes
   tags:

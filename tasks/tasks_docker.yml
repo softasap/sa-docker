@@ -25,7 +25,6 @@
     tags:
         -docker
 
-
   - name: Docker | Add docker gpg keys
     apt_key:
       url: https://download.docker.com/linux/ubuntu/gpg
