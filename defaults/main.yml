@@ -1,8 +1,5 @@
 ---
-# defaults file for sa-docker
-  root_dir: "{{ role_path }}"
-  role_dir: "{{ role_path }}"
-
+# defaults file for sa_docker
   deploy_user: "{{ansible_user_id}}"
 
   option_install_docker_compose: false
