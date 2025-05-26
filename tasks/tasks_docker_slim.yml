@@ -1,0 +1,34 @@
+- name: Download docker-slim archive
+  ansible.builtin.get_url:
+    url: "https://github.com/slimtoolkit/slim/releases/download/1.40.11/dist_linux.tar.gz"
+    dest: "/tmp/docker-slim.tar.gz"
+    mode: '0644'
+
+- name: Extract docker-slim archive
+  ansible.builtin.unarchive:
+    src: "/tmp/docker-slim.tar.gz"
+    dest: "/tmp"
+    remote_src: yes
+
+- name: Move docker-slim binaries to /usr/local/bin
+  ansible.builtin.copy:
+    src: "/tmp/dist_linux/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    mode: '0755'
+    owner: root
+    group: root
+    remote_src: yes
+  become: true
+  with_items:
+    - slim
+    - mint
+    - mint-sensor
+    - docker-slim
+
+- name: Clean up temporary files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/tmp/docker-slim.tar.gz"
+    - "/tmp/dist_linux"

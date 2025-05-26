@@ -1,0 +1,29 @@
+- name: LazyDocker | Download lazydocker archive
+  ansible.builtin.get_url:
+    url: "https://github.com/jesseduffield/lazydocker/releases/download/v0.24.1/lazydocker_0.24.1_Linux_x86.tar.gz"
+    dest: "/tmp/lazydocker.tar.gz"
+    mode: '0644'
+
+- name: Extract lazydocker archive
+  ansible.builtin.unarchive:
+    src: "/tmp/lazydocker.tar.gz"
+    dest: "/tmp"
+    remote_src: yes
+
+- name: Move lazydocker binary to /usr/local/bin
+  ansible.builtin.copy:
+    src: "/tmp/lazydocker"
+    dest: "/usr/local/bin/lazydocker"
+    mode: '0755'
+    owner: root
+    group: root
+    remote_src: yes
+  become: true
+
+- name: Clean up temporary files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/tmp/lazydocker.tar.gz"
+    - "/tmp/lazydocker"

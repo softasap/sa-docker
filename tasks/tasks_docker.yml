@@ -1,154 +1,199 @@
-#
   - name: Docker | Check if is present
-    command: test -x /usr/bin/docker
-    ignore_errors: yes
+    ansible.builtin.command: test -x /usr/bin/docker
+    changed_when: false
+    ignore_errors: true
     register: docker_present
-    changed_when: False
     tags:
-        -docker
+      - docker
 
-  - name: DEBUG | current distribution
-    debug: var="ansible_distribution"
+  - name: Docker | Debug distribution
+    ansible.builtin.debug:
+      var: ansible_distribution
 
-  - name: Docker | Install dependencies
-    apt:
-      name:
-        - apt-transport-https
-        - ca-certificates
-        - curl
-      state: present
-    retries: 3
-    register: result
-    until: result is not failed
-    when: docker_present is failed and ansible_os_family == "Debian"
-    become: yes
-    tags:
-        -docker
+  - name: Docker | Debug OS family
+    ansible.builtin.debug:
+      var: ansible_os_family
 
-  - name: Docker | Add docker gpg keys
-    apt_key:
-      url: https://download.docker.com/linux/ubuntu/gpg
-      state: present
-    retries: 3
-    register: result
-    until: result is not failed
-    when: docker_present is failed and ansible_os_family == "Debian"
-    become: yes
-    tags:
-        -docker
+  - name: Debian docker install
+    when: ansible_os_family == 'Debian'
+    block:
+      - name: Docker | Remove legacy packages
+        ansible.builtin.apt:
+          state: absent
+          name: "{{ item }}"
+        loop:
+          - docker.io
+          - docker-doc
+          - docker-compose
+          - docker-compose-v2
+          - podman-docker
+          - containerd
+          - runc
+        become: true
 
-  - block:
+      - name: Docker | Install credential-pass helper
+        ansible.builtin.get_url:
+          url: https://github.com/docker/docker-credential-helpers/releases/download/v0.9.3/docker-credential-pass-v0.9.3.linux-amd64
+          dest: /usr/local/bin/docker-credentials-pass
+          mode: '0755'
+        become: true
 
-      - name: Docker | Add docker  repo
-        apt_repository:
-          repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+      - name: Docker | Install ECR helper
+        ansible.builtin.apt:
           state: present
-          filename: docker
-        become: yes
-        tags:
-          - docker
+          name: "{{ item }}"
+          update_cache: yes
+        loop:
+          - amazon-ecr-credential-helper
+        become: true
 
-      - name: Docker | Install docker
-        apt:
-          name: "docker-ce"
-          state: "present"
-          update_cache: "yes"
-        retries: 3
-        register: result
-        until: result is not failed
-        become: yes
-        tags:
-          - docker
-
-    when: docker_present is failed and ansible_distribution == "Ubuntu"
-
-  - block:
-
-      - name: Docker | Install dependencies
-        yum:
+      - name: Docker | Install CA certs and curl
+        ansible.builtin.apt:
           name:
-            - yum-utils
-            - device-mapper-persistent-data
-            - lvm2
-          state: "present"
-        retries: 3
-        register: result
-        until: result is not failed
-        become: yes
-        tags:
-          - docker
+            - ca-certificates
+            - curl
+          state: present
+          update_cache: yes
+        become: true
 
-      - name: Docker | add repo
-        shell: >
-            yum-config-manager
-            --add-repo
-            https://download.docker.com/linux/centos/docker-ce.repo
-        become: yes
-        tags:
-          - docker
-          - skip_ansible_lint
+      - name: Docker | Create GPG key directory
+        ansible.builtin.file:
+          path: /etc/apt/keyrings
+          state: directory
+          mode: '0755'
+        become: true
 
-      - name: Docker | Install docker-ce
-        yum:
-          name: "docker-ce"
-          state: "present"
-        retries: 3
-        register: result
-        until: result is not failed
-        become: yes
-        tags:
-          - docker
-    when: docker_present is failed and ansible_distribution == "CentOS"
+      - name: Docker | Add Docker GPG key
+        ansible.builtin.get_url:
+          url: https://download.docker.com/linux/ubuntu/gpg
+          dest: /etc/apt/keyrings/docker.asc
+          mode: '0644'
+        become: true
 
-  - block:
-      - name: Docker | Install dependencies
-        dnf:
+      - name: Docker | Verify GPG key permissions
+        ansible.builtin.file:
+          path: /etc/apt/keyrings/docker.asc
+          mode: '0644'
+        become: true
+
+      - name: Docker | Detect system architecture
+        ansible.builtin.command: dpkg --print-architecture
+        register: architecture_result
+        changed_when: false
+
+      - name: Docker | Detect OS codename
+        ansible.builtin.shell: . /etc/os-release && echo "$VERSION_CODENAME"
+        register: codename_result
+        become: true
+        changed_when: false
+
+      - name: Docker | Debug architecture
+        ansible.builtin.debug:
+          msg: "Arch detected {{ architecture_result.stdout }}"
+
+      - name: Docker | Debug codename
+        ansible.builtin.debug:
+          msg: "Code name detected {{ codename_result.stdout }}"
+
+      - name: Docker | Configure repository
+        ansible.builtin.copy:
+          content: |
+            deb [arch={{ architecture_result.stdout }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ codename_result.stdout }} stable
+          dest: /etc/apt/sources.list.d/docker.list
+          mode: '0644'
+        become: true
+
+      - name: Docker | Update package cache
+        ansible.builtin.apt:
+          update_cache: yes
+        become: true
+
+      - name: Docker | Install core packages
+        ansible.builtin.apt:
           name:
-            - dnf-plugins-core
-          state: "present"
-        retries: 3
+            - docker-ce
+            - docker-ce-cli
+            - containerd.io
+            - docker-buildx-plugin
+            - docker-compose-plugin
+          state: present
+          update_cache: yes
+        become: true
+
+      - name: Docker | Stop Docker service
+        ansible.builtin.systemd:
+          name: docker
+          state: stopped
+        become: true
+        when: docker_test is not defined
+
+      - name: Docker | Start Docker service
+        ansible.builtin.systemd:
+          name: docker
+          state: started
+        become: true
+        when: docker_test is not defined
+
+      - name: Docker | Verify installation
+        ansible.builtin.command: docker run hello-world
         register: result
-        until: result is not failed
-        become: yes
-        tags:
-          - docker
+        failed_when: "'Hello from Docker!' not in result.stdout"
+        changed_when: false
+        become: true
+        when: docker_test is not defined
 
-      - name: Docker | add repo
-        shell: "dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo"
-        become: yes
-        tags:
-          - docker
-          - skip_ansible_lint
+      - name: Docker | Assert hello-world success
+        ansible.builtin.assert:
+          that:
+            - "'Hello from Docker!' in result.stdout"
+          msg: "Docker hello-world container did not run successfully"
+        become: true
+        when: docker_test is not defined
 
-      - name: Docker | Install docker-ce
-        dnf:
-          name: "docker-ce"
-          state: "present"
-        retries: 3
-        register: result
-        until: result is not failed
-        become: yes
-        tags:
-          - docker
-    when: docker_present is failed and ansible_distribution == "Fedora"
+      - name: Docker | Debug user group addition
+        ansible.builtin.debug:
+          msg: "Adding {{ ansible_user_id }} to docker group"
 
-  - name: Docker | fallback - Install docker via web installer
-    shell: wget -qO- https://get.docker.com/ | sh
-    when:  docker_present is failed and ansible_distribution not in ["Debian", "CentOS", "Fedora"]
-    become: yes
-    tags:
-        -docker
-        -skip_ansible_lint
+      - name: Docker | Add user to docker group
+        ansible.builtin.user:
+          name: "{{ ansible_user_id }}"
+          groups: docker
+          append: yes
+        become: true
 
-  - name: Docker | Add current user to docker group
-    user: name={{ deploy_user | default(ansible_user_id) }} groups=docker append=yes
-    become: yes
-    tags:
-        -docker
+      - name: Docker | Add ctop repository key
+        ansible.builtin.apt_key:
+          url: https://azlux.fr/repo.gpg
+          state: present
+        become: true
 
-  - name: Docker | Start and enable service
-    service: name=docker state=restarted enabled=yes
-    when: docker_test is not defined
-    become: yes
-    tags:
-        -docker
+      - name: Docker | Add ctop repository
+        ansible.builtin.apt_repository:
+          repo: "deb http://packages.azlux.fr/debian stable main"
+          state: present
+        become: true
+
+      - name: Docker | Install ctop
+        ansible.builtin.apt:
+          name: docker-ctop
+          update_cache: yes
+        become: true
+
+
+      - name: Docker | Download and install binary docker-compose
+        ansible.builtin.get_url:
+          url: "https://github.com/docker/compose/releases/download/v2.36.2/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}"
+          dest: "/usr/local/bin/docker-compose"
+          mode: '0755'
+          owner: root
+          group: root
+        become: true
+
+      - name: Docker | Download and install dry
+        ansible.builtin.get_url:
+          url: " https://github.com/moncho/dry/releases/download/v0.11.2/dry-linux-amd64"
+          dest: "/usr/local/bin/dry"
+          mode: '0755'
+          owner: root
+          group: root
+        become: true

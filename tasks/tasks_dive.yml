@@ -1,0 +1,16 @@
+- name: Download dive .deb package
+  ansible.builtin.get_url:
+    url: "https://github.com/wagoodman/dive/releases/download/v0.13.1/dive_0.13.1_linux_amd64.deb"
+    dest: "/tmp/dive.deb"
+    mode: '0644'
+
+- name: Install dive package
+  ansible.builtin.apt:
+    deb: "/tmp/dive.deb"
+    state: present
+  become: true
+
+- name: Clean up temporary deb file
+  ansible.builtin.file:
+    path: "/tmp/dive.deb"
+    state: absent

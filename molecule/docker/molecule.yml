@@ -1,4 +1,5 @@
 ---
+role_name_check: 1
 dependency:
   name: galaxy
 driver:
@@ -11,9 +12,6 @@ platforms:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     privileged: true
     pre_build_image: true
-ansible:
-  lint:
-    name: ansible-lint
 provisioner:
   name: ansible
   playbooks:
@@ -21,7 +19,7 @@ provisioner:
   inventory:
     host_vars:
       instance:
-        foo: bar
+        docker_test: true
         role_under_test: ${MOLECULE_TEST_ROLE:-role_under_test}
 scenario:
   name: docker
