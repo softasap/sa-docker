@@ -1,9 +1,12 @@
 ---
 # defaults file for sa_docker
-  deploy_user: "{{ansible_user_id}}"
+  deploy_user: "{{ ansible_user_id }}"
 
   option_install_docker_compose: false
   option_install_docker_registry: false
+  option_install_lazydocker: false
+  option_install_dive: false
+  option_install_slim: false
   option_install_docker_python: false
 #  docker_compose_venv_directory: "/home/{{ansible_user_id}}/venv/docker"
 
@@ -14,8 +17,4 @@
   docker_registry_cert_file: domain.com/fullchain.pem
   docker_registry_key_file: domain.com/privkey.pem
 
-#  Since Ansible 2.8 the default value ansible_python_interpreter is auto_legacy, which means that it will prefer /usr/bin/python
-#(if it exists) over the discovered Python version. You can set it to auto, which will be default in the future, so
-#it will work in the opposite way.
-#  ansible_python_interpreter: auto
   preferred_python_version: "{{ ansible_python_version }}"

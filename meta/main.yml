@@ -28,6 +28,8 @@ galaxy_info:
         # - trusty
         - xenial
         - bionic
+        - focal
+        - jammy
     - name: EL
       versions:
         # - 6

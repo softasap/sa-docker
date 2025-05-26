@@ -1,97 +1,103 @@
 ---
-  - block:
-
-    - name: Python | install python3-pip
-      apt:
-        update_cache: yes
+- name: PYTHON | Debian Python fallback setup
+  when: ansible_os_family == "Debian"
+  block:
+    - name: PYTHON | Install python3-pip
+      ansible.builtin.apt:
+        update_cache: true
         state: present
         name:
-         - python3-pip
+          - python3-pip
       retries: 3
       register: result
       until: result is not failed
-      become: yes
+      become: true
       tags:
-        -python
+        - python
 
-    - name: Python | Update pip
-      shell: pip3 install -U  pyopenssl ndg-httpsclient pyasn1
-      become: yes
+    - name: PYTHON | Update pip dependencies
+      ansible.builtin.shell:
+        cmd: pip3 install -U pyopenssl ndg-httpsclient pyasn1
+      become: true
       tags:
-        -python
-        -skip_ansible_lint
+        - python
+        - skip_ansible_lint
 
-    - name: Python | install python3-dev
-      apt: name=python3-dev update_cache=yes state=present
-      become: yes
+    - name: PYTHON | Install python3-dev
+      ansible.builtin.apt:
+        name: python3-dev
+        update_cache: true
+        state: present
+      become: true
       tags:
-        -python
-        -skip_ansible_lint
+        - python
+        - skip_ansible_lint
 
-    - name: Python | VirtualEnv
-      shell: pip3 install -U virtualenv
-      become: yes
+    - name: PYTHON | Install virtualenv
+      ansible.builtin.shell:
+        cmd: pip3 install -U virtualenv
+      become: true
       tags:
-        -python
-        -skip_ansible_lint
+        - python
+        - skip_ansible_lint
 
-    - name: Python | virtualenvwrapper
-      shell: pip3 install -U --ignore-installed six virtualenvwrapper
-      become: yes
+    - name: PYTHON | Install virtualenvwrapper
+      ansible.builtin.shell:
+        cmd: pip3 install -U --ignore-installed six virtualenvwrapper
+      become: true
       tags:
-        -python
-        -skip_ansible_lint
+        - python
+        - skip_ansible_lint
 
-    - name: Python | install ca-certificates
-      package: name="ca-certificates" state=present
+    - name: PYTHON | Install CA certificates
+      ansible.builtin.package:
+        name: ca-certificates
+        state: present
       retries: 3
       register: result
       until: result is not failed
       when: ansible_os_family == 'Debian'
-      become: yes
+      become: true
       tags:
-        -python
-    when: ansible_os_family == "Debian"
+        - python
 
-#  / UBUNTU
-
-  - block:
-
-    - name: Python | install python3
-      shell: yum -y install python3
+- name: PYTHON | RHEL/CentOS Python fallback setup
+  when: ansible_distribution in ['CentOS', 'Red Hat Enterprise Linux', 'Fedora']
+  block:
+    - name: PYTHON | Install Python 3
+      ansible.builtin.shell:
+        cmd: yum -y install python3
       retries: 3
       register: result
       until: result is not failed
-      become: yes
+      become: true
       tags:
-        -python
-        -skip_ansible_lint
+        - python
+        - skip_ansible_lint
 
-    - name: Python | install python36-devel
-      shell: yum -y install python3-devel python3-setuptools
+    - name: PYTHON | Install development tools
+      ansible.builtin.shell:
+        cmd: yum -y install python3-devel python3-setuptools
       retries: 3
       register: result
       until: result is not failed
-      become: yes
+      become: true
       tags:
-        -python
-        -skip_ansible_lint
+        - python
+        - skip_ansible_lint
 
-    - name: Python | VirtualEnv
-      shell: pip3 install -U virtualenv
-      become: yes
+    - name: PYTHON | Setup virtual environment
+      ansible.builtin.shell:
+        cmd: pip3 install -U virtualenv
+      become: true
       tags:
-        -python
-        -skip_ansible_lint
+        - python
+        - skip_ansible_lint
 
-    - name: Python | virtualenvwrapper
-      shell: pip3 install -U virtualenvwrapper
-      become: yes
+    - name: PYTHON | Configure virtualenvwrapper
+      ansible.builtin.shell:
+        cmd: pip3 install -U virtualenvwrapper
+      become: true
       tags:
-        -python
-        -skip_ansible_lint
-
-
-    when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution=='Fedora'
-
-# / CentOs  Redhat
+        - python
+        - skip_ansible_lint

@@ -11,9 +11,11 @@
     - include_vars: "playbook_vars.yml"
 
   roles:
-     - {
+      - {
         role: "sa-docker",
         option_install_docker_compose: true,
-        option_install_docker_registry: false,
-        option_install_docker_python: false
-       }
+        option_install_docker_registry: true,
+        option_install_lazydocker: true,
+        option_install_dive: true,
+        option_install_slim: true,
+        }

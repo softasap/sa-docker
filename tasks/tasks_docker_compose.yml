@@ -1,72 +1,75 @@
-- name: install the 'Development tools' package group
-  yum:
+- name: DOCKER COMPOSE | Install Development tools (RHEL/CentOS)
+  ansible.builtin.yum:
     name: "@Development tools"
     state: present
-  become: yes
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  become: true
+  when: ansible_distribution in ['CentOS', 'Red Hat Enterprise Linux']
   tags:
     - docker-compose
 
-- name: Docker Compose | install rustup for current user
-  shell: curl https://sh.rustup.rs -sSf | sh -s -- -y
-  args:
+- name: DOCKER COMPOSE | Install rustup for current user
+  ansible.builtin.shell:
+    cmd: curl https://sh.rustup.rs -sSf | sh -s -- -y
     creates: "~/.cargo/bin/"
   tags:
     - docker-compose
     - skip_ansible_lint
 
-- name: Docker Compose | install rustup for root
-  shell: curl https://sh.rustup.rs -sSf | sh -s -- -y
-  args:
+- name: DOCKER COMPOSE | Install rustup for root
+  ansible.builtin.shell:
+    cmd: curl https://sh.rustup.rs -sSf | sh -s -- -y
     creates: "~/.cargo/bin/"
-  become: yes
+  become: true
   tags:
     - docker-compose
     - skip_ansible_lint
 
-- block:
+- name: DOCKER COMPOSE | install for py2 family
+  when: preferred_python_version is version_compare('3','<')
+  block:
+    - name: DOCKER COMPOSE | Detected python
+      ansible.builtin.debug:
+        var: ansible_python_version
 
-  - name: Docker Compose | Detected python
-    debug: var="ansible_python_version"
+    - name: DOCKER COMPOSE | Set fact pip to use
+      ansible.builtin.set_fact:
+        docker_compose_pip_executable: pip
+      tags:
+        - docker-compose
 
-  - name: Docker Compose | Set fact pip to use
-    set_fact:
-      docker_compose_pip_executable: pip
-    tags:
-      - docker-compose
+    - name: DOCKER COMPOSE | Check pip installation
+      ansible.builtin.shell:
+        cmd: command -v pip >/dev/null 2>&1
+      register: pip_present
+      ignore_errors: true
+      changed_when: false
+      tags:
+        - docker-compose
 
-  - name: Check if pip is installed
-    shell: command -v pip >/dev/null 2>&1
-    register: pip_present
-    ignore_errors: yes
-    tags:
-      - docker-compose
-
-  - name: Python | Ensure epel repo present for centos
-    yum:
-      name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-      state: present
-    when: pip_present is failed
-    become: yes
-    tags:
-      - docker-compose
-
-  - name: Python | install python-pip
-    package:
-      state: present
-      name:
-        - python-pip
-    retries: 3
-    register: result
-    until: result is not failed
-    when: pip_present is failed
-    become: yes
-    tags:
-      - docker-compose
-
-  - name: Python | install pip build environment (debian)
-    package:
+    - name: DOCKER COMPOSE | Install EPEL repository (CentOS)
+      ansible.builtin.yum:
+        name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
         state: present
+      when: pip_present is failed
+      become: true
+      tags:
+        - docker-compose
+
+    - name: DOCKER COMPOSE | Install python-pip
+      ansible.builtin.package:
+        name:
+          - python-pip
+        state: present
+      retries: 3
+      register: result
+      until: result is not failed
+      when: pip_present is failed
+      become: true
+      tags:
+        - docker-compose
+
+    - name: DOCKER COMPOSE | Install pip build environment (debian)
+      ansible.builtin.package:
         name:
           - build-essential
           - libssl-dev
@@ -74,17 +77,17 @@
           - python-dev
           - rust
           - cargo
-    retries: 3
-    register: result
-    until: result is not failed
-    when: (pip_present is failed) and (ansible_os_family == "Debian")
-    become: yes
-    tags:
-       - docker-compose
-
-  - name: Python | install pip build environment (rpm/fedora)
-    package:
         state: present
+      retries: 3
+      register: result
+      until: result is not failed
+      when: (pip_present is failed) and (ansible_os_family == "Debian")
+      become: true
+      tags:
+        - docker-compose
+
+    - name: DOCKER COMPOSE | Install pip build environment (rpm/fedora)
+      ansible.builtin.package:
         name:
           - gcc
           - libffi-devel
@@ -92,74 +95,78 @@
           - openssl-devel
           - rust
           - cargo
-    retries: 3
-    register: result
-    until: result is not failed
-    when: (pip_present is failed) and (ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution=='Fedora')
-    become: yes
-    tags:
-       - docker-compose
-
-  when: preferred_python_version is version_compare('3','<')
-
-- block:
-
-  - name: Docker Compose | Detected python
-    debug: var="ansible_python_version"
-
-  - name: Docker Compose | Set fact pip to use (3)
-    set_fact:
-      docker_compose_pip_executable: pip3
-    tags:
-      - docker-compose
-
-  - name: Check if pip3 is installed
-    shell: command -v pip3 >/dev/null 2>&1
-    register: pip_present
-    ignore_errors: yes
-    tags:
-      - docker-compose
-
-  - name: Python | install python3-pip
-    package:
-      state: present
-      name:
-        - python3-pip
-    retries: 3
-    register: result
-    until: result is not failed
-    when: pip_present is failed
-    become: yes
-    tags:
-      - docker-compose
-
-  - name: Upgrade pip if any
-    shell: pip3 install -U pip
-    ignore_errors: yes
-    when: pip_present is failed
-    tags:
-      - docker-compose
-      - skip_ansible_lint
-
-  - name: Python | install pip3 build environment (debian)
-    package:
         state: present
+      retries: 3
+      register: result
+      until: result is not failed
+      when: (pip_present is failed) and (ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution=='Fedora')
+      become: true
+      tags:
+        - docker-compose
+
+- name: DOCKER COMPOSE | install for py3 family
+  when: preferred_python_version is version_compare('3','>=')
+  block:
+    - name: DOCKER COMPOSE | Detected python 3
+      ansible.builtin.debug:
+        var: ansible_python_version
+
+    - name: DOCKER COMPOSE | Set fact pip to use (3)
+      ansible.builtin.set_fact:
+        docker_compose_pip_executable: pip3
+      tags:
+        - docker-compose
+
+    - name: DOCKER COMPOSE | Check pip3 installation
+      ansible.builtin.shell:
+        cmd: command -v pip3 >/dev/null 2>&1
+      register: pip_present
+      ignore_errors: true
+      changed_when: false
+      tags:
+        - docker-compose
+
+    - name: DOCKER COMPOSE | Install python3-pip
+      ansible.builtin.package:
+        name:
+          - python3-pip
+        state: present
+      retries: 3
+      register: result
+      until: result is not failed
+      when: pip_present is failed
+      become: true
+      tags:
+        - docker-compose
+
+    - name: DOCKER COMPOSE | Upgrade pip if needed
+      ansible.builtin.shell:
+        cmd: pip3 install -U pip
+      ignore_errors: true
+      changed_when: false
+      when: pip_present is failed
+      tags:
+        - docker-compose
+        - skip_ansible_lint
+
+    - name: DOCKER COMPOSE | Install pip3 build environment (debian)
+      ansible.builtin.package:
         name:
           - build-essential
           - libssl-dev
           - libffi-dev
           - python3-dev
-    retries: 3
-    register: result
-    until: result is not failed
-    when: (pip_present is failed) and (ansible_os_family == "Debian")
-    become: yes
-    tags:
-       - docker-compose
-
-  - name: Python | install pip build environment (rpm/fedora)
-    package:
         state: present
+      retries: 3
+      register: result
+      until: result is not failed
+      when: (pip_present is failed) and (ansible_os_family == "Debian")
+      become: true
+      tags:
+        - docker-compose
+
+    - name: DOCKER COMPOSE | Install pip build environment (rpm/fedora)
+      ansible.builtin.package:
         name:
           - gcc
           - libffi-devel
@@ -167,45 +174,42 @@
           - openssl-devel
           - rust
           - cargo
-    retries: 3
-    register: result
-    until: result is not failed
-    when: (pip_present is failed) and (ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution=='Fedora')
-    become: yes
-    tags:
-       - docker-compose
+        state: present
+      retries: 3
+      register: result
+      until: result is not failed
+      when: (pip_present is failed) and (ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution=='Fedora')
+      become: true
+      tags:
+        - docker-compose
 
-
-  when: preferred_python_version is version_compare('3','>=')
-
-- name: Docker Compose | Upgrade pip version
-  shell: "{{ docker_compose_pip_executable }} install -U pip"
+- name: DOCKER COMPOSE | Upgrade pip version
+  ansible.builtin.shell:
+    cmd: "{{ docker_compose_pip_executable }} install -U pip"
   when: docker_compose_venv_directory is not defined
-  become: yes
+  become: true
   tags:
-     - docker-compose
-     - skip_ansible_lint
+    - docker-compose
+    - skip_ansible_lint
 
-- name: Docker Compose | Installing pypi package using shell with {{ docker_compose_pip_executable }}
-  pip:
-     name: "{{ item }}"
-     state: present
-     executable: "{{ docker_compose_pip_executable }}"
-  # shell: "{{ docker_compose_pip_executable }} install {{ item }}"
+- name: DOCKER COMPOSE | Install pypi packages
+  ansible.builtin.pip:
+    name: "{{ item }}"
+    state: present
+    executable: "{{ docker_compose_pip_executable }}"
   retries: 3
   register: result
   until: result is not failed
   when: docker_compose_venv_directory is not defined
-  become: yes
-  with_items:
-#    - setuptools-rust
+  become: true
+  loop:
     - docker-compose
   tags:
     - docker-compose
     - skip_ansible_lint
 
-- name: Docker Compose | Installing pypi package in venv
-  pip:
+- name: DOCKER COMPOSE | Install pypi packages in venv
+  ansible.builtin.pip:
     name: "{{ item }}"
     virtualenv: "{{ docker_compose_venv_directory }}"
     state: present
@@ -213,8 +217,8 @@
   register: result
   until: result is not failed
   when: docker_compose_venv_directory is defined
-  with_items:
+  become: true
+  loop:
     - docker-compose
-  become: yes
   tags:
     - docker-compose
