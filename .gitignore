@@ -10,3 +10,4 @@ __pycache__/
 .cache
 .aid*
 .ansible
+meta/.galaxy_install_info
