@@ -125,6 +125,10 @@
           name: docker
           state: stopped
         become: true
+        register: internal_stop_docker_service_1
+        retries: 3
+        delay: 5
+        until: internal_stop_docker_service_1 is successful
         when: docker_test is not defined
 
       - name: Docker | Start Docker service
@@ -132,6 +136,10 @@
           name: docker
           state: started
         become: true
+        register: internal_start_docker_service_1
+        retries: 3
+        delay: 5
+        until: internal_start_docker_service_1 is successful
         when: docker_test is not defined
 
       - name: Docker | Verify installation
