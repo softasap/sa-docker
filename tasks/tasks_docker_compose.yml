@@ -1,9 +1,26 @@
+- name: DOCKER COMPOSE | Check if docker-compose is already installed
+  ansible.builtin.command: which docker-compose
+  register: docker_compose_check
+  changed_when: false
+  failed_when: false
+  tags:
+    - docker-compose
+
+- name: DOCKER COMPOSE | Display docker-compose already installed message
+  ansible.builtin.debug:
+    msg: "docker-compose already installed at {{ docker_compose_check.stdout }}, skipping installation"
+  when: docker_compose_check.rc == 0
+  tags:
+    - docker-compose
+
 - name: DOCKER COMPOSE | Install Development tools (RHEL/CentOS)
   ansible.builtin.yum:
     name: "@Development tools"
     state: present
   become: true
-  when: ansible_distribution in ['CentOS', 'Red Hat Enterprise Linux']
+  when:
+    - ansible_distribution in ['CentOS', 'Red Hat Enterprise Linux']
+    - docker_compose_check.rc != 0
   tags:
     - docker-compose
 
@@ -11,6 +28,7 @@
   ansible.builtin.shell:
     cmd: curl https://sh.rustup.rs -sSf | sh -s -- -y
     creates: "~/.cargo/bin/"
+  when: docker_compose_check.rc != 0
   tags:
     - docker-compose
     - skip_ansible_lint
@@ -20,12 +38,15 @@
     cmd: curl https://sh.rustup.rs -sSf | sh -s -- -y
     creates: "~/.cargo/bin/"
   become: true
+  when: docker_compose_check.rc != 0
   tags:
     - docker-compose
     - skip_ansible_lint
 
 - name: DOCKER COMPOSE | install for py2 family
-  when: preferred_python_version is version_compare('3','<')
+  when:
+    - preferred_python_version is version_compare('3','<')
+    - docker_compose_check.rc != 0
   block:
     - name: DOCKER COMPOSE | Detected python
       ansible.builtin.debug:
@@ -105,7 +126,9 @@
         - docker-compose
 
 - name: DOCKER COMPOSE | install for py3 family
-  when: preferred_python_version is version_compare('3','>=')
+  when:
+    - preferred_python_version is version_compare('3','>=')
+    - docker_compose_check.rc != 0
   block:
     - name: DOCKER COMPOSE | Detected python 3
       ansible.builtin.debug:
@@ -186,7 +209,9 @@
 - name: DOCKER COMPOSE | Upgrade pip version
   ansible.builtin.shell:
     cmd: "{{ docker_compose_pip_executable }} install -U pip"
-  when: docker_compose_venv_directory is not defined
+  when:
+    - docker_compose_venv_directory is not defined
+    - docker_compose_check.rc != 0
   become: true
   tags:
     - docker-compose
@@ -200,7 +225,9 @@
   retries: 3
   register: result
   until: result is not failed
-  when: docker_compose_venv_directory is not defined
+  when:
+    - docker_compose_venv_directory is not defined
+    - docker_compose_check.rc != 0
   become: true
   loop:
     - docker-compose
@@ -216,7 +243,9 @@
   retries: 3
   register: result
   until: result is not failed
-  when: docker_compose_venv_directory is defined
+  when:
+    - docker_compose_venv_directory is defined
+    - docker_compose_check.rc != 0
   become: true
   loop:
     - docker-compose
