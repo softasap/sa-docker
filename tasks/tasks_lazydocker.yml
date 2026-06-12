@@ -1,6 +1,6 @@
 - name: LazyDocker | Download lazydocker archive
   ansible.builtin.get_url:
-    url: "https://github.com/jesseduffield/lazydocker/releases/download/v0.24.1/lazydocker_0.24.1_Linux_x86.tar.gz"
+    url: "https://github.com/jesseduffield/lazydocker/releases/download/v0.24.3/lazydocker_0.24.3_Linux_x86.tar.gz"
     dest: "/tmp/lazydocker.tar.gz"
     mode: '0644'
 

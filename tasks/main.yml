@@ -1,5 +1,14 @@
 ---
 # tasks file for sa_docker
+  - name: Install gpg (required for repository keys)
+    become: true
+    ansible.builtin.apt:
+      name:
+        - gpg
+      state: present
+      update_cache: yes
+    when: ansible_os_family == 'Debian'
+
   - name: Include Docker installation tasks
     ansible.builtin.include_tasks: tasks_docker.yml
 

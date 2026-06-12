@@ -138,7 +138,7 @@
         become: true
         register: internal_start_docker_service_1
         retries: 3
-        delay: 5
+        delay: 20
         until: internal_start_docker_service_1 is successful
         when: docker_test is not defined
 
